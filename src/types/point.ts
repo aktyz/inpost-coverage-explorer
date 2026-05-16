@@ -1,8 +1,30 @@
-export type CountryCode = "AT" | "BE" | "DE" | "DK" | "ES" | "FI" | "FR" | "GB" | "HU" | "IT" | "LU" | "NL" | "PL" | "PT" | "SE";
+export const COUNTRY_CODES = [
+	"AT", "BE", "DE", "DK", "ES", "FI", "FR",
+	"GB", "HU", "IT", "LU", "NL", "PL", "PT", "SE"
+] as const;
 
-export type Status = "Created" | "Disabled" | "NonOperating" | "Operating" | "Overloaded";
+export type CountryCode = typeof COUNTRY_CODES[number];
 
-export type PointType = "parcel_locker" | "parcel_locker_superpop" | "pok" | "pop" | "pudo_mini" | "refrigerated_locker_machine";
+export const STATUSES = [
+	"Created",
+	"Disabled",
+	"NonOperating",
+	"Operating",
+	"Overloaded"
+] as const;
+
+export type Status = typeof STATUSES[number];
+
+export const POINT_TYPES = [
+	"parcel_locker",
+	"parcel_locker_superpop",
+	"pok",
+	"pop",
+	"pudo_mini",
+	"refrigerated_locker_machine"
+] as const;
+
+export type PointType = typeof POINT_TYPES[number];
 
 export interface Point {
 	name: string; // "ADA01M"

@@ -1,16 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchAllPoints } from "./api/inpost";
-import { getUniqueCountries, getUniqueStatuses, getUniquePointTypes } from "./util/exploreDataset";
 import { deleteCacheData, CACHE_KEYS } from "./util/cache";
 
 import './App.css'
 import { type Point } from "./types/point";
+import { Filters } from "./components/Filters";
+import { PointsTable } from "./components/PointsTable";
+
+import { DEFAULT_FILTERS } from "./filters/defaultFilters";
+import { filterPoints } from "./filters/filterPoints";
 
 function App() {
   const [data, setData] = useState<Point[]>([]);
   const [loading, setloading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState(false);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
   const loadData = async (forceRefresh: boolean = false) => {
     setloading(true);
@@ -25,6 +30,9 @@ function App() {
       setloading(false);
     }
   };
+
+  const filteredPoints = useMemo(() => { return filterPoints(data, filters); },
+      [data, filters]);
 
   useEffect(() => {
     loadData();
@@ -41,10 +49,6 @@ function App() {
   if (error)
     return <p>{error}</p>;
 
-  const uniqueCountries = getUniqueCountries(data);
-  const uniqueStatuses = getUniqueStatuses(data);
-  const uniquePointTypes = getUniquePointTypes(data);
-
   return (
     <>
     <h1>Inpost Coverage Explorer</h1>
@@ -54,10 +58,9 @@ function App() {
       </button>
       {isFromCache && <span style={{ marginLeft: "1rem", color: "#666" }}>📦 (loaded from cache)</span>}
     </div>
-    <p>Total points: {data.length}</p>
-    <p>Unique Countries: {uniqueCountries.length} - {uniqueCountries.join(", ")}</p>
-    <p>Unique Statuses: {uniqueStatuses.length} - {uniqueStatuses.join(", ")}</p>
-    <p>Unique Point Types: {uniquePointTypes.length} - {uniquePointTypes.map(type => type.replace(/_/g, " ").charAt(0).toUpperCase() + type.slice(1).replace(/_/g, " ")).join(", ")}</p>
+    <h2>Showing first 200 rows of {data.length}</h2>
+    <Filters filters={filters} onChange={setFilters}/>
+    <PointsTable points={filteredPoints}/>
     </>
   )
 }
