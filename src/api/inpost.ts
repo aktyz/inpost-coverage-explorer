@@ -1,4 +1,6 @@
 import { mapInpostPointApiToPoint } from "../mappers/pointMapper";
+import { getCachedData, setCacheData, CACHE_KEYS } from "../util/cache";
+import type { Point } from "../types/point";
 
 const BASE_URL = "https://api-global-points.easypack24.net/v1/points";
 
@@ -14,7 +16,17 @@ export async function fetchPoints() {
   return data;
 }
 
-export async function fetchAllPoints() {
+export async function fetchAllPoints(forceRefresh: boolean = false): Promise<{ points: Point[]; fromCache: boolean }> {
+	// Check cache first if not forcing refresh
+	if (!forceRefresh) {
+		const cached = await getCachedData<Point[]>(CACHE_KEYS.INPOST_POINTS);
+		if (cached) {
+			console.log("Loading data from cache");
+			return { points: cached, fromCache: true };
+		}
+	}
+
+	console.log("Fetching fresh data from API");
 	let allPoints = [];
 	let page = 1;
 	let hasMore = true;
@@ -32,5 +44,11 @@ export async function fetchAllPoints() {
 		hasMore = data.items.length > 0;
 		page++;
 	}
-	return allPoints.map(mapInpostPointApiToPoint);
+
+	const mappedPoints = allPoints.map(mapInpostPointApiToPoint);
+
+	// Store in cache
+	await setCacheData(CACHE_KEYS.INPOST_POINTS, mappedPoints);
+
+	return { points: mappedPoints, fromCache: false };
 }
