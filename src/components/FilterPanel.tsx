@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 interface FilterPanelProps {
 	columnId: string;
 	values: string[];
@@ -6,7 +8,11 @@ interface FilterPanelProps {
 	isVisible: boolean;
 	onMouseEnter: () => void;
 	onMouseLeave: () => void;
+	searchValue?: string;
+	onSearchChange?: (columnId: string, value: string) => void;
 }
+
+const TEXT_SEARCH_COLUMNS = ["name", "city", "address", "location_description"];
 
 export function FilterPanel({
 	columnId,
@@ -16,10 +22,15 @@ export function FilterPanel({
 	isVisible,
 	onMouseEnter,
 	onMouseLeave,
+	searchValue = "",
+	onSearchChange,
 }: FilterPanelProps) {
-	const displayLimit = 20;
-	const isLimitedDisplay = values.length > displayLimit;
-	const valuesToShow = isLimitedDisplay ? values.slice(0, displayLimit) : values;
+	const isTextSearch = TEXT_SEARCH_COLUMNS.includes(columnId);
+	const [inputValue, setInputValue] = useState(searchValue);
+
+	useEffect(() => {
+		setInputValue(searchValue);
+	}, [searchValue]);
 
 	if (!isVisible) {
 		return null;
@@ -45,24 +56,66 @@ export function FilterPanel({
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
 		>
-			<div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-				{valuesToShow.map((value) => (
-					<label key={value} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px" }}>
-						<input
-							type="checkbox"
-							checked={selectedFilters.includes(value)}
-							onChange={() => onFilterChange(columnId, value)}
-							style={{ cursor: "pointer" }}
-						/>
-						<span>{value}</span>
-					</label>
-				))}
-				{isLimitedDisplay && (
-					<div style={{ marginTop: "5px", fontSize: "11px", color: "var(--text-secondary)", fontStyle: "italic" }}>
-						... and {values.length - displayLimit} more
-					</div>
-				)}
-			</div>
+			{isTextSearch ? (
+				<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+					<input
+						type="text"
+						placeholder="Search..."
+						value={inputValue}
+						onChange={(e) => setInputValue(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter") {
+								onSearchChange?.(columnId, inputValue);
+							}
+						}}
+						style={{
+							padding: "6px",
+							border: "1px solid var(--border-color)",
+							borderRadius: "3px",
+							fontSize: "12px",
+							backgroundColor: "var(--background-primary)",
+							color: "var(--text-primary)",
+						}}
+					/>
+					{inputValue && (
+						<button
+							onClick={() => {
+								setInputValue("");
+								onSearchChange?.(columnId, "");
+							}}
+							style={{
+								padding: "4px 8px",
+								fontSize: "12px",
+								backgroundColor: "var(--background-secondary)",
+								border: "1px solid var(--border-color)",
+								borderRadius: "3px",
+								cursor: "pointer",
+							}}
+						>
+							Clear
+						</button>
+					)}
+				</div>
+			) : (
+				<div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+					{values.map((value) => (
+						<label key={value} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px" }}>
+							<input
+								type="checkbox"
+								checked={selectedFilters.includes(value)}
+								onChange={() => onFilterChange(columnId, value)}
+								style={{ cursor: "pointer" }}
+							/>
+							<span>{value}</span>
+						</label>
+					))}
+					{values.length > 20 && (
+						<div style={{ marginTop: "5px", fontSize: "11px", color: "var(--text-secondary)", fontStyle: "italic" }}>
+							... and {values.length - 20} more
+						</div>
+					)}
+				</div>
+			)}
 		</div>
 	);
 }

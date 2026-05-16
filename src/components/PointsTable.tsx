@@ -19,6 +19,8 @@ const ITEMS_PER_PAGE = 50;
 
 // Type for column filters: column ID -> array of selected values
 type ColumnFilters = Record<string, (string | string[])[]>;
+// Type for text search filters: column ID -> search string
+type TextSearchFilters = Record<string, string>;
 
 const defaultColumns: ColumnDef<Point, any>[] = [
 	{
@@ -62,6 +64,7 @@ const defaultColumns: ColumnDef<Point, any>[] = [
 export function PointsTable({ points }: Props) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
+	const [textSearchFilters, setTextSearchFilters] = useState<TextSearchFilters>({});
 	const [hoveredFilterColumn, setHoveredFilterColumn] = useState<string | null>(null);
 
 	// Extract unique values for each column
@@ -92,40 +95,62 @@ export function PointsTable({ points }: Props) {
 		return result;
 	}, [points]);
 
-	// Apply column filters with OR logic within columns
+	// Apply column filters and text search filters
 	const filteredPoints = useMemo(() => {
-		if (Object.keys(columnFilters).length === 0) {
+		const hasCheckboxFilters = Object.keys(columnFilters).length > 0;
+		const hasTextSearchFilters = Object.keys(textSearchFilters).length > 0 && Object.values(textSearchFilters).some(v => v.length > 0);
+
+		if (!hasCheckboxFilters && !hasTextSearchFilters) {
 			return points;
 		}
 
 		return points.filter((point) => {
-			// For each column with active filters
+			// Apply checkbox filters (OR logic within columns, AND logic between columns)
 			for (const [columnId, selectedValues] of Object.entries(columnFilters)) {
 				if (selectedValues.length === 0) continue;
 
 				let matches = false;
-
-				// Get the point value for this column
 				const pointValue = (point as any)[columnId];
 
-				// For array values (like types), check if any selected value is in the array
 				if (Array.isArray(pointValue)) {
 					matches = selectedValues.some((selectedValue) =>
 						pointValue.includes(selectedValue as string)
 					);
 				} else {
-					// For single values, check if the point value matches any selected value
 					matches = selectedValues.includes(pointValue);
 				}
 
-				// If this column filter doesn't match, exclude the row
 				if (!matches) {
 					return false;
 				}
 			}
+
+			// Apply text search filters (case-insensitive substring matching)
+			for (const [columnId, searchValue] of Object.entries(textSearchFilters)) {
+				if (!searchValue.length) continue;
+
+				let searchText = "";
+
+				// Handle different column types
+				if (columnId === "address") {
+					const parts = [point.street];
+					if (point.building_number) parts.push(point.building_number);
+					if (point.flat_number) parts.push(point.flat_number);
+					searchText = parts.join(" ");
+				} else {
+					const pointValue = (point as any)[columnId];
+					searchText = String(pointValue || "");
+				}
+
+				// Case-insensitive substring match
+				if (!searchText.toLowerCase().includes(searchValue.toLowerCase())) {
+					return false;
+				}
+			}
+
 			return true;
 		});
-	}, [points, columnFilters]);
+	}, [points, columnFilters, textSearchFilters]);
 
 	const table = useReactTable({
 		data: filteredPoints,
@@ -171,21 +196,43 @@ export function PointsTable({ points }: Props) {
 		});
 	};
 
+	const handleTextSearchChange = (columnId: string, value: string) => {
+		setTextSearchFilters((prev) => {
+			if (!value) {
+				const updated = { ...prev };
+				delete updated[columnId];
+				return updated;
+			}
+			return {
+				...prev,
+				[columnId]: value,
+			};
+		});
+	};
+
 	const clearAllFilters = () => {
 		setColumnFilters({});
+		setTextSearchFilters({});
 	};
 
 	return (
 		<div>
 			{/* Column Filters Summary */}
 			<div style={{ marginTop: "20px", marginBottom: "20px" }}>
-				{Object.keys(columnFilters).length > 0 && (
-					<div>
-						<strong>Active Filters:</strong>
-						{Object.entries(columnFilters).map(([columnId, values]) => (
+			{(Object.keys(columnFilters).length > 0 || Object.values(textSearchFilters).some(v => v.length > 0)) && (
+				<div>
+					<strong>Active Filters:</strong>
+					{Object.entries(columnFilters).map(([columnId, values]) => (
+						<div key={columnId} style={{ fontSize: "12px", marginTop: "5px" }}>
+							<strong>{columnId.charAt(0).toUpperCase() + columnId.slice(1).replace(/_/g, " ")}:</strong> {(values as string[]).join(", ")}
+						</div>
+					))}
+					{Object.entries(textSearchFilters).map(([columnId, searchValue]) => (
+						searchValue && (
 							<div key={columnId} style={{ fontSize: "12px", marginTop: "5px" }}>
-								<strong>{columnId.charAt(0).toUpperCase() + columnId.slice(1).replace(/_/g, " ")}:</strong> {(values as string[]).join(", ")}
+								<strong>{columnId.charAt(0).toUpperCase() + columnId.slice(1).replace(/_/g, " ")}:</strong> "{searchValue}"
 							</div>
+						)
 						))}
 						<button onClick={clearAllFilters} style={{ marginTop: "10px", padding: "4px 8px" }}>
 							Clear All Filters
@@ -229,6 +276,8 @@ export function PointsTable({ points }: Props) {
 											isVisible={showFilterPanel}
 											onMouseEnter={() => setHoveredFilterColumn(columnId)}
 											onMouseLeave={() => setHoveredFilterColumn(null)}
+											searchValue={textSearchFilters[columnId] || ""}
+											onSearchChange={handleTextSearchChange}
 										/>
 									</th>
 								);
