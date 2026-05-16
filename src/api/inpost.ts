@@ -1,3 +1,5 @@
+import { mapInpostPointApiToPoint } from "../mappers/pointMapper";
+
 const BASE_URL = "https://api-global-points.easypack24.net/v1/points";
 
 export async function fetchPoints() {
@@ -30,5 +32,5 @@ export async function fetchAllPoints() {
 		hasMore = data.items.length > 0;
 		page++;
 	}
-	return allPoints;
+	return allPoints.map(mapInpostPointApiToPoint);
 }
