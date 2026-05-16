@@ -45,7 +45,14 @@ export async function fetchAllPoints(forceRefresh: boolean = false): Promise<{ p
 		page++;
 	}
 
-	const mappedPoints = allPoints.map(mapInpostPointApiToPoint);
+	// Filter out points with city name "test" (case-insensitive) or name containing "test"
+	const filteredPoints = allPoints.filter(
+		point => 
+			point.address_details.city.toLowerCase() !== "test" &&
+			!point.name.toLowerCase().includes("test")
+	);
+
+	const mappedPoints = filteredPoints.map(mapInpostPointApiToPoint);
 
 	// Store in cache
 	await setCacheData(CACHE_KEYS.INPOST_POINTS, mappedPoints);
