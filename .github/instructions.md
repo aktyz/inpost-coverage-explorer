@@ -2,7 +2,7 @@
 
 ## ⚠️ Important: Development Server
 
-**DO NOT run `npm run dev`** — the development server causes the website to load very slowly during hot reload cycles. Instead, use:
+**DO NOT run `npm run dev`** — the project is building and starting pretty fast, however then it starts to load data from the InPost API endpoint. It takes way too long as a check if your changes are fine. Instead, use:
 
 ```bash
 npm run build

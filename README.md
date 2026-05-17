@@ -13,13 +13,12 @@ The goal of this project is to transform raw, paginated logistics data into a st
 
 ## Demo & Description
 
-The application fetches all available parcel point data from the InPost API and presents it in a responsive table interface. Users can filter the dataset by country, city, point type, and operational status.
+The application fetches all available parcel point data from the InPost API and presents it in a responsive table interface. Users can filter the dataset by country, city, point name, address, point type, and operational status.
 
-All filters dynamically update a set of computed metrics displayed above the table, such as:
-- total number of points in the current selection
-- number of unique countries and cities
-- percentage of locker-enabled points
-- active vs inactive distribution
+All filters dynamically update the analytics displayed above the table:
+- a per-country breakdown showing each country's point count relative to the filtered total
+- a stacked status bar per country (Operating / Overloaded / Non-Operating / Created / Disabled)
+- a result counter showing how many points match the current filters out of the total dataset
 
 ### Key design decisions
 
@@ -32,17 +31,18 @@ All filters dynamically update a set of computed metrics displayed above the tab
 - **Separation of concerns:**
   Data fetching, filtering logic, and UI rendering are kept modular to improve readability and maintainability.
 
-If applicable, include:
-- a link to the deployed solution
-- screenshots of the UI or key outputs
-- a short screen recording or demo video
+- **IndexedDB caching:**
+  The full dataset (~5 minutes to fetch from the API) is persisted in the browser's IndexedDB for 24 hours. Subsequent visits load in seconds. A manual refresh option is available to force a new fetch.
 
 ## Technologies
 
 - React (Vite) — fast development environment and modern frontend structure
 - TypeScript — type safety and better maintainability
 - Vite — lightweight build tool with fast HMR
+- TanStack React Table — headless table library powering client-side sorting and pagination
+- Tailwind CSS v4 — utility-first styling for all components
 - Fetch API — native HTTP requests to InPost REST API
+- IndexedDB (via `cache.ts`) — browser-native persistence layer caching the full dataset for 24 hours
 
 These tools were chosen to keep the project lightweight while maintaining scalability and clarity.
 
@@ -50,7 +50,7 @@ These tools were chosen to keep the project lightweight while maintaining scalab
 
 ### Prerequisites
 
-- Node.js >= 18
+- Node.js >= 20.19 or >= 22.12
 - npm >= 9
 - Internet connection (for API access)
 
@@ -102,15 +102,15 @@ Time-based availability analysis (if data supports it)
 
 ## AI usage
 
-AI tools (ChatGPT) were used to:
-- explore possible architectural approaches
-- refine project scope
-- generate boilerplate setup instructions
+AI tools were used throughout this project as development accelerators:
 
-All generated code and suggestions were reviewed, understood, and adapted manually. No code was used without comprehension.
+- **ChatGPT** — used for exploring architectural approaches and refining project scope
+- **GitHub Copilot and Claude** — used as AI coding agents to assist with implementation
+
+All AI-generated code and suggestions were reviewed, understood, and deliberately adapted. Every decision reflects intentional engineering choices rather than uncritical acceptance of generated output.
 
 ## Anything else?
 
-The main design decision in this project was to prioritize data exploration clarity over feature richness. Instead of building a complex system, the focus was placed on making raw API data understandable and interactive through filtering and real-time aggregation.
+The main design decision in this project was to prioritize data exploration clarity and user experience over feature richness. Instead of building a complex system, the focus was placed on making raw API data understandable and interactive through filtering and real-time aggregation.
 
 This reflects an intentional tradeoff: simplicity and interpretability over engineering complexity.
