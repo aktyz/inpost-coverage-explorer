@@ -49,11 +49,17 @@ const defaultColumns: ColumnDef<Point, any>[] = [
 	{
 		id: "address",
 		header: "Address",
+		accessorFn: (row) => {
+			const parts = [row.street];
+			if (row.building_number) parts.push(row.building_number);
+			if (row.flat_number) parts.push(row.flat_number);
+			return parts.join(" ");
+		},
 		cell: (info) => {
 			const row = info.row.original;
 			const parts = [row.street];
 			if (row.building_number) parts.push(row.building_number);
-			if (row.flat_number) parts.push(`\\${row.flat_number}`);
+			if (row.flat_number) parts.push(row.flat_number);
 			return parts.join("  ");
 		},
 	},

@@ -36,6 +36,7 @@ export function FilterPanel({
 		<div
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
+			onClick={(e) => e.stopPropagation()}
 			className={`
 				absolute
 				z-50
