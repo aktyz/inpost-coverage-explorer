@@ -219,7 +219,7 @@ export function PointsTable({ points }: Props) {
 
 	return (
 		<>
-			<CountryAnalytics allPoints={points} filteredPoints={filteredPoints} />
+			<CountryAnalytics filteredPoints={filteredPoints} />
 			<TableButtonsContainer
 				onClearFilters={clearAllFilters}
 				onPreviousPage={() => table.previousPage()}
