@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { type Point } from "../types/point";
 import { FilterPanel } from "./FilterPanel";
+import { TableButtonsContainer } from "./TableButtonsContainer";
 
 interface Props {
 	points: Point[];
@@ -216,112 +217,115 @@ export function PointsTable({ points }: Props) {
 	};
 
 	return (
-		<div>
-			{/* Column Filters Summary */}
-			<div style={{ marginTop: "20px", marginBottom: "20px" }}>
-			{(Object.keys(columnFilters).length > 0 || Object.values(textSearchFilters).some(v => v.length > 0)) && (
-				<div>
-					<strong>Active Filters:</strong>
-					{Object.entries(columnFilters).map(([columnId, values]) => (
-						<div key={columnId} style={{ fontSize: "12px", marginTop: "5px" }}>
-							<strong>{columnId.charAt(0).toUpperCase() + columnId.slice(1).replace(/_/g, " ")}:</strong> {(values as string[]).join(", ")}
-						</div>
-					))}
-					{Object.entries(textSearchFilters).map(([columnId, searchValue]) => (
-						searchValue && (
-							<div key={columnId} style={{ fontSize: "12px", marginTop: "5px" }}>
-								<strong>{columnId.charAt(0).toUpperCase() + columnId.slice(1).replace(/_/g, " ")}:</strong> "{searchValue}"
-							</div>
-						)
-						))}
-						<button onClick={clearAllFilters} style={{ marginTop: "10px", padding: "4px 8px" }}>
-							Clear All Filters
-						</button>
-					</div>
-				)}
-			</div>
-
-			{/* Table */}
-			<table style={{ position: "relative" }}>
-				<thead>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<tr key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
-								const columnId = header.column.id;
-								const showFilterPanel = hoveredFilterColumn === columnId;
-								const values = uniqueColumnValues[columnId as keyof typeof uniqueColumnValues] || [];
-								const selectedFilters = (columnFilters[columnId] || []) as string[];
+		<>
+			<TableButtonsContainer
+				onClearFilters={clearAllFilters}
+				onPreviousPage={() => table.previousPage()}
+				onNextPage={() => table.nextPage()}
+				canGoPrevious={table.getCanPreviousPage()}
+				canGoNext={table.getCanNextPage()}
+				hasActiveFilters={Object.keys(columnFilters).length > 0 || Object.values(textSearchFilters).some(v => v.length > 0)}
+				currentPage={table.getState().pagination.pageIndex + 1}
+				pageCount={table.getPageCount()}
+				filteredRowCount={filteredPoints.length}
+				totalRowCount={points.length}
+				columnFilters={columnFilters}
+				textSearchFilters={textSearchFilters}
+			/>
+		{/* Table */}
+			<div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden overflow-x-auto">
+				<table className="min-w-full text-sm text-left">
+					<thead>
+						{table.getHeaderGroups().map((headerGroup) => (
+							<tr key={headerGroup.id}>
+								{headerGroup.headers.map((header) => {
+									const columnId = header.column.id;
+									const showFilterPanel = hoveredFilterColumn === columnId;
+									const values = uniqueColumnValues[columnId as keyof typeof uniqueColumnValues] || [];
+									const selectedFilters = (columnFilters[columnId] || []) as string[];
 
 
-								return (
-									<th
-										key={header.id}
-										onClick={header.column.getToggleSortingHandler()}
-										title={header.column.getCanSort() ? "Click to sort" : undefined}
-										onMouseEnter={() => setHoveredFilterColumn(columnId)}
-										onMouseLeave={() => setHoveredFilterColumn(null)}
-										style={{ position: "relative", cursor: header.column.getCanSort() ? "pointer" : "default" }}
-									>
-										{header.isPlaceholder
-											? null
-											: flexRender(header.column.columnDef.header, header.getContext())}
-										{header.column.getCanSort() && getSortIndicator(header.column.id)}
-
-										{/* Filter Panel - Shows on Hover */}
-										<FilterPanel
-											columnId={columnId}
-											values={values}
-											selectedFilters={selectedFilters}
-											onFilterChange={toggleColumnFilter}
-											isVisible={showFilterPanel}
+									return (
+										<th
+											key={header.id}
+											onClick={header.column.getToggleSortingHandler()}
+											title={header.column.getCanSort() ? "Click to sort" : undefined}
 											onMouseEnter={() => setHoveredFilterColumn(columnId)}
 											onMouseLeave={() => setHoveredFilterColumn(null)}
-											searchValue={textSearchFilters[columnId] || ""}
-											onSearchChange={handleTextSearchChange}
-										/>
-									</th>
-								);
-							})}
-						</tr>
-					))}
-				</thead>
-				<tbody>
-					{table.getRowModel().rows.map((row) => (
-						<tr key={row.id}>
-							{row.getVisibleCells().map((cell) => (
-								<td key={cell.id}>
-									{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								</td>
-							))}
-						</tr>
-					))}
-				</tbody>
-			</table>
+											className="
+												relative
+												px-4
+												py-3
+												text-xs
+												font-semibold
+												text-gray-700
+												uppercase
+												tracking-wide
+												border-b
+												border-gray-200
+												bg-gray-50
+												sticky
+												top-0
+												z-10
+												cursor-pointer
+												select-none
+												hover:bg-gray-100
+												transition-colors
+											"
+										>
+											{header.isPlaceholder
+												? null
+												: flexRender(header.column.columnDef.header, header.getContext())}
+											{header.column.getCanSort() && getSortIndicator(header.column.id)}
 
-			{/* Pagination Controls */}
-			<div>
-				<div>
-					<button
-						onClick={() => table.previousPage()}
-						disabled={!table.getCanPreviousPage()}
-					>
-						Previous
-					</button>
-					<span>
-						Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-					</span>
-					<button
-						onClick={() => table.nextPage()}
-						disabled={!table.getCanNextPage()}
-					>
-						Next
-					</button>
-				</div>
-
-				<span>
-					Showing {table.getRowModel().rows.length} of {filteredPoints.length} results
-				</span>
+											{/* Filter Panel - Shows on Hover */}
+											<FilterPanel
+												columnId={columnId}
+												values={values}
+												selectedFilters={selectedFilters}
+												onFilterChange={toggleColumnFilter}
+												isVisible={showFilterPanel}
+												onMouseEnter={() => setHoveredFilterColumn(columnId)}
+												onMouseLeave={() => setHoveredFilterColumn(null)}
+												searchValue={textSearchFilters[columnId] || ""}
+												onSearchChange={handleTextSearchChange}
+											/>
+										</th>
+									);
+								})}
+							</tr>
+						))}
+					</thead>
+					<tbody>
+						{table.getRowModel().rows.map((row) => (
+							<tr
+								key={row.id}
+								className="
+									border-b
+									border-gray-100
+									hover:bg-yellow-50
+									transition-colors
+									duration-100
+								"
+							>
+								{row.getVisibleCells().map((cell) => (
+									<td
+										key={cell.id}
+										className="
+											px-4
+											py-2
+											text-gray-800
+											whitespace-nowrap
+										"
+									>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</td>
+								))}
+							</tr>
+						))}
+					</tbody>
+				</table>
 			</div>
-		</div>
+		</>
 	);
 }

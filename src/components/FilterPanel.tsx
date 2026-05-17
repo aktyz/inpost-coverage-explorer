@@ -32,32 +32,28 @@ export function FilterPanel({
 		setInputValue(searchValue);
 	}, [searchValue]);
 
-	if (!isVisible) {
-		return null;
-	}
-
 	return (
 		<div
-			style={{
-				position: "absolute",
-				top: "100%",
-				left: "0",
-				backgroundColor: "var(--background-secondary)",
-				border: "1px solid var(--border-color)",
-				borderRadius: "4px",
-				padding: "10px",
-				minWidth: "250px",
-				maxWidth: "300px",
-				maxHeight: "300px",
-				overflowY: "auto",
-				zIndex: 1000,
-				boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-			}}
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
+			className={`
+				absolute
+				z-50
+				mt-2
+				w-72
+				bg-white
+				border
+				border-gray-200
+				rounded-xl
+				shadow-lg
+				p-3
+				transition
+				duration-150
+				${isVisible ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"}
+			`}
 		>
 			{isTextSearch ? (
-				<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+				<div className="space-y-2">
 					<input
 						type="text"
 						placeholder="Search..."
@@ -68,14 +64,21 @@ export function FilterPanel({
 								onSearchChange?.(columnId, inputValue);
 							}
 						}}
-						style={{
-							padding: "6px",
-							border: "1px solid var(--border-color)",
-							borderRadius: "3px",
-							fontSize: "12px",
-							backgroundColor: "var(--background-primary)",
-							color: "var(--text-primary)",
-						}}
+						className="
+							w-full
+							px-3
+							py-2
+							text-sm
+							border
+							border-gray-300
+							rounded-lg
+							bg-white
+							text-gray-800
+							placeholder-gray-400
+							focus:outline-none
+							focus:ring-2
+							focus:ring-yellow-400
+						"
 					/>
 					{inputValue && (
 						<button
@@ -83,34 +86,52 @@ export function FilterPanel({
 								setInputValue("");
 								onSearchChange?.(columnId, "");
 							}}
-							style={{
-								padding: "4px 8px",
-								fontSize: "12px",
-								backgroundColor: "var(--background-secondary)",
-								border: "1px solid var(--border-color)",
-								borderRadius: "3px",
-								cursor: "pointer",
-							}}
+							className="
+								text-sm
+								text-gray-600
+								hover:text-gray-900
+								transition-colors
+							"
 						>
 							Clear
 						</button>
 					)}
 				</div>
 			) : (
-				<div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+				<div className="max-h-60 overflow-y-auto space-y-2 pr-1">
 					{values.map((value) => (
-						<label key={value} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px" }}>
+						<label
+							key={value}
+							className="
+								flex
+								items-center
+								gap-2
+								text-sm
+								text-gray-700
+								hover:bg-gray-50
+								px-2
+								py-1
+								rounded-md
+								cursor-pointer
+							"
+						>
 							<input
 								type="checkbox"
 								checked={selectedFilters.includes(value)}
 								onChange={() => onFilterChange(columnId, value)}
-								style={{ cursor: "pointer" }}
+								className="
+									accent-yellow-400
+									w-4
+									h-4
+								"
 							/>
-							<span>{value}</span>
+							<span className="select-none">{value}</span>
 						</label>
 					))}
 					{values.length > 20 && (
-						<div style={{ marginTop: "5px", fontSize: "11px", color: "var(--text-secondary)", fontStyle: "italic" }}>
+						<div
+							className="text-xs text-gray-500 mt-2 px-2"
+						>
 							... and {values.length - 20} more
 						</div>
 					)}
