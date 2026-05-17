@@ -45,6 +45,8 @@ function App() {
   }, []);
 
   const handleRefresh = async () => {
+    setIsFromCache(false);
+    setloading(true);
     await deleteCacheData(CACHE_KEYS.INPOST_POINTS);
     loadData(true);
   };
@@ -81,7 +83,9 @@ function App() {
           {/* Loading State */}
           {loading && (
             <span className="inline-flex items-center gap-2 text-sm text-gray-600 bg-blue-100 text-blue-800 px-3 py-2 rounded-lg mt-4">
-              ⏳ {isFromCache ? "Loading data from IndexedDB..." : "Loading data from InPost endpoint into IndexedDB..."}
+              ⏳ {isFromCache
+                  ? "Loading data from IndexedDB..."
+                  : "Fetching data from API... On my machine this took around 5m30s - please enjoy my CV during this time"}
             </span>
           )}
 
@@ -98,6 +102,7 @@ function App() {
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => setShowCV(!showCV)}
+                  title={"Toggle between CV and data - data stays safe in IDBDatabase"}
                   className="
                     px-4
                     py-2
@@ -117,6 +122,7 @@ function App() {
                 <button
                   onClick={handleRefresh}
                   disabled={loading}
+                  title={"Don't click unless you want to wait another 5 minutes"}
                   className="
                     px-4
                     py-2

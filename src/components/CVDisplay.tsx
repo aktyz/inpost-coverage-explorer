@@ -30,7 +30,7 @@ interface CVData {
 
 const cvData: CVData = {
 	name: "ZYTA SŁOWIAŃSKA",
-	title: "FINANCIAL DATA SYSTEMS ENGINEER",
+	title: "SOFTWARE ENGINEER",
 	phone: "(48) 668 173 312",
 	email: "zyta.slowianska@gmail.com",
 	github: "github.com/aktyz",
