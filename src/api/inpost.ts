@@ -45,9 +45,23 @@ export async function fetchAllPoints(forceRefresh: boolean = false): Promise<{ p
 		page++;
 	}
 
+	const excludedNames = new Set([
+		"FR000001",
+		"FR00666T",
+		"FR00667T",
+		"FR03296T",
+		"FR066974T",
+		"PNN01M",
+		"GLE01M",
+		"OCZ01G",
+		"KRA50N",
+		"KON08N"
+	]);
+
 	// Filter out points with city name "test" (case-insensitive) or name containing "test"
 	const filteredPoints = allPoints.filter(
-		point => 
+		point =>
+			!excludedNames.has(point.name) &&
 			point.address_details.city.toLowerCase() !== "test" &&
 			!point.name.toLowerCase().includes("test")
 	);

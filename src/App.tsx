@@ -72,7 +72,7 @@ function App() {
               tracking-tight
             "
           >
-            Inpost Coverage Explorer
+            InPost Coverage Explorer
           </h1>
           <div className="mt-3 h-1 w-24 rounded-full bg-yellow-400" />
           <p className="mt-4 text-gray-600 max-w-2xl">
