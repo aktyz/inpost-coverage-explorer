@@ -88,6 +88,18 @@ Move filtering and aggregation logic to a backend service for scalability
 Heatmaps of coverage density<br>
 Time-based availability analysis (if data supports it)
 
+### Code quality fixes
+
+1. **High** — Replace `as X` type assertions in `pointMapper.ts` with proper type guards or Zod schema validation
+2. **High** — Fix unawaited `deleteCacheData()` call in `cache.ts` (silent async failure)
+3. **High** — Remove dead code: unused `fetchPoints()`, `exploreDataset.ts`, and empty `App.css`
+4. **Medium** — Fix `setloading` → `setLoading` naming inconsistency in `App.tsx`
+5. **Medium** — Extract CV data to `data/cv.ts`; make `CVDisplay` a pure rendering component
+6. **Medium** — Extract filter logic from `PointsTable` into a dedicated `useTableFilters` hook
+7. **Medium** — Add Zod schema validation for `InPostPointApi` responses at the API boundary
+8. **Low** — Extract column name formatter to `util/formatters.ts` to avoid duplication
+9. **Low** — Add ARIA labels and semantic attributes for accessibility
+
 ## AI usage
 
 AI tools (ChatGPT) were used to:

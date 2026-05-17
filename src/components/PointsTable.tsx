@@ -11,6 +11,7 @@ import {
 import { type Point } from "../types/point";
 import { FilterPanel } from "./FilterPanel";
 import { TableButtonsContainer } from "./TableButtonsContainer";
+import { CountryAnalytics } from "./CountryAnalytics";
 
 interface Props {
 	points: Point[];
@@ -218,6 +219,7 @@ export function PointsTable({ points }: Props) {
 
 	return (
 		<>
+			<CountryAnalytics allPoints={points} filteredPoints={filteredPoints} />
 			<TableButtonsContainer
 				onClearFilters={clearAllFilters}
 				onPreviousPage={() => table.previousPage()}
